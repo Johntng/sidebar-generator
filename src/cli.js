@@ -13,7 +13,6 @@ function parseArgumentsIntoOptions(rawArgs) {
             '--help': Boolean,
             '--depth': Number,
             '--sort': Boolean,
-            '--default': Boolean,
             '-h': '--help',
             '-d': '--depth',
             '-s': '--sort',
@@ -25,8 +24,7 @@ function parseArgumentsIntoOptions(rawArgs) {
     return {
         help: args['--help'] || false,
         depth: args['--depth'] || 5,
-        sort: args['--sort'] || false,
-        default: args['--default'] || false
+        sort: args['--sort'] || false
     };
 }
 
@@ -71,7 +69,7 @@ function generateSidebarFile(MDfiles) {
 
     fs.writeFile(_sidebarFile, content, 'utf8', (err) => { if (err) { return err; }});
 
-    console.log('\nGenerated ' + _sidebarFile + 'successfully.\n');
+    console.log('\nGenerated ' + _sidebarFile + ' successfully.\n');
 }
 
 function displayHelp() {
@@ -83,7 +81,6 @@ function displayHelp() {
         `sort is not on by default\n` +
         `\n` +
         `--help, -h \t\t Display help.\n` +
-        `--default \t\t Shows default options.\n` +
         `--depth, -d [Number] \t Set the depth of the directory to recursive to find *.md files.\n` +
         `--sort, -s \t\t Option to sort the the *.md files in alphabetical order.` +
         `\n`

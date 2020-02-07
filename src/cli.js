@@ -69,7 +69,18 @@ function generateSidebarFile(MDfiles) {
         content += `* [` + entity.basename + `](` + entity.path.replace(/ /g, '%20') + `)\n`;
     });
 
+    try {
+        var data = fs.readFileSync(...)
+    } catch (err) {
+        // If the type is not what you want, then just throw the error again.
+        if (err.code !== 'ENOENT') throw err;
+
+        // Handle a file-not-found error
+    }
+
     fs.writeFile(_sidebarFile, content, 'utf8', (err) => { if (err) { return err; }});
+
+    console.log('\nGenerated ' + _sidebarFile + 'successfully.\n');
 }
 
 function displayHelp() {
@@ -110,8 +121,6 @@ export async function cli(args) {
     if(generator_options.sort === true) {
         MDfiles = sortMDFiles(MDfiles);
     }
-
-    //console.log(MDfiles);
 
     // Step 3: Generate the _sidebar.md file.
     generateSidebarFile(MDfiles);

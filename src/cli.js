@@ -69,15 +69,6 @@ function generateSidebarFile(MDfiles) {
         content += `* [` + entity.basename + `](` + entity.path.replace(/ /g, '%20') + `)\n`;
     });
 
-    try {
-        var data = fs.readFileSync(...)
-    } catch (err) {
-        // If the type is not what you want, then just throw the error again.
-        if (err.code !== 'ENOENT') throw err;
-
-        // Handle a file-not-found error
-    }
-
     fs.writeFile(_sidebarFile, content, 'utf8', (err) => { if (err) { return err; }});
 
     console.log('\nGenerated ' + _sidebarFile + 'successfully.\n');

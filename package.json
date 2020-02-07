@@ -1,6 +1,6 @@
 {
   "name": "@johntng/sidebar-generator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A CLI too to generate _sidebar.md for docsify recursively.",
   "bin": {
     "@johntng/sidebar-generator": "bin/sidebar-generator",

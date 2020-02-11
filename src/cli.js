@@ -5,7 +5,13 @@ import inquirer from 'inquirer';
 
 // Some constants for this program.
 const _sidebarFile = '_sidebar.md';
+const _readmeFile = 'README.md';
+
+// Add files to filter away.
 const filterFiles = ['*.md','!README.md', '!_sidebar.md', '!CHANGELOG.md', '!LICENSE.md'];
+
+// Add directories to filter away.
+const filterDirectories = ['*','!node_modules'];
 
 // A global object to keep the cli options.
 let options = {};
@@ -19,12 +25,38 @@ function sidebarFileExist() {
 }
 
 /**
+ * This is a function to test whether the readme file exist.
+ * @return <boolean>
+ */
+function readmeFileExist() {
+    return fs.existsSync(_readmeFile);
+}
+
+/**
+ * @param str - source string to make it Title Case.
  * Make a md filename string a title case. Split case are [space] and '-' character.
  */
 function toTitleCase(str) {
+
+    // Remove .md file extension.
+    // Split the string into an array.
+    // Make the first character upper case.
+    // Make the rest of the characters lower case.
+    // Merge them back with a space in between.
     return str.replace('.md', '').split(/-| /)
         .map(w => w[0].toUpperCase() + w.substr(1).toLowerCase())
         .join(' ');
+}
+
+/**
+ * This function correct all encodings in the paths so that markdown can follow and link.
+ * @param str - input path in string format
+ * @return {void | string | *}
+ */
+function corectPathEncoding(path) {
+
+    // Use / /g global flag to replace all spaces with url encoding spaces.
+   return path.replace(/ /g, '%20');
 }
 
 /**
@@ -77,7 +109,7 @@ async function promptForMissingOptions(options) {
         questions.push({
             type: 'list',
             name: 'overwrite',
-            message: 'Do you want to overwrite the _sidebar.md file?',
+            message: 'Do you want to overwrite the ' + _sidebarFile + ' file?',
             choices: ['No', 'Yes'],
             default: 'No',
         });
@@ -99,7 +131,7 @@ async function parseDirectoriesForMDFiles() {
     const files = await readdirp.promise(
         './', {
             fileFilter: filterFiles,
-            directoryFilter: '*',
+            directoryFilter: filterDirectories,
             type: 'files',
             depth: options.depth
         });
@@ -108,13 +140,13 @@ async function parseDirectoriesForMDFiles() {
 }
 
 /**
- * This function sort the list of MDfiles based on string compare.
- * @param MDfiles
+ * This function sort the list of markdown files based on string compare.
+ * @param mdFiles
  * @return List of files sorted based on string.
  */
-function sortMDFiles(MDfiles) {
+function sortMDFiles(mdFiles) {
 
-    MDfiles.sort((a,b) => {
+    mdFiles.sort((a,b) => {
 
         if (a.path < b.path)
             return -1;
@@ -123,23 +155,25 @@ function sortMDFiles(MDfiles) {
         return 0;
     });
 
-    return MDfiles;
+    return mdFiles;
 }
 
 /**
  * This is the actual function to create and write to the _sidebar.md file.
- * @param MDfiles
+ * @param mdFiles
  */
-function generateSidebarFile(MDfiles) {
+function generateSidebarFile(mdFiles) {
 
     let content = `<!-- docs/_sidebar.md -->\n\n`;
 
-    // Assume README.md exist.
-    content += `* [Home](/)\n`;
+    // Create this if _readmeFile exist.
+    if(readmeFileExist()) {
+        content += `* [Home](/)\n`;
+    }
 
     // Iterate the rest of the files.
-    MDfiles.forEach(entity => {
-        content += `* [` + toTitleCase(entity.basename) + `](` + entity.path.replace(/ /g, '%20') + `)\n`;
+    mdFiles.forEach(entity => {
+        content += `* [` + toTitleCase(entity.basename) + `](` + corectPathEncoding(entity.path) + `)\n`;
     });
 
     fs.writeFile(_sidebarFile, content, 'utf8', (err) => { if (err) { return err; }});
@@ -153,16 +187,16 @@ function generateSidebarFile(MDfiles) {
 function displayHelp() {
 
     console.log(
-        `\nOptions: \n\n` +
-        `Default options:\n` +
+        `\nDefault options:\n` +
         `'depth' is 5\n` +
-        `'sort' is off by default\n` +
-        `'overwrite' is is off by default\n` +
-        `\n` +
+        `'sort' is OFF\n` +
+        `'overwrite' is OFF\n` +
+        `\n\nOptions: \n\n` +
         `--help, -h \t\t Display help.\n` +
         `--depth, -d [Number] \t Set the depth of the directory to recursive to find *.md files.\n` +
         `\t\t\t Depth 0 means it will NOT recurse.\n` +
-        `--sort, -s \t\t Option to sort the the *.md files in alphabetical order.` +
+        `--sort, -s \t\t Option to sort the the *.md files in alphabetical order.\n` +
+        `--overwrite, -o \t If this option is set, it will overwrite the ${_sidebarFile} file if exist.` +
         `\n`
     );
 }
@@ -197,14 +231,14 @@ export async function cli(args) {
     }
 
     // Step 3: Parse the directories for *.md files.
-    let MDfiles = await parseDirectoriesForMDFiles();
+    let mdFiles = await parseDirectoriesForMDFiles();
 
     // Step 4: Sort the files if required.
     // Sort is done based on directories, then file names.
     if(options.sort === true) {
-        MDfiles = sortMDFiles(MDfiles);
+        mdFiles = sortMDFiles(mdFiles);
     }
 
     // Step 5: Generate the _sidebar.md file.
-    generateSidebarFile(MDfiles);
+    generateSidebarFile(mdFiles);
 }

@@ -1,6 +1,3 @@
-Test ...... 1    
-
-
 # sidebar-generator
 This is a CLI tool to generate the _sidebar.md file for docsify directories recursively.  
 
